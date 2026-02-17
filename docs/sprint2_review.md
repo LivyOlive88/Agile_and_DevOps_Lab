@@ -22,6 +22,8 @@ I successfully completed all planned User Stories for Sprint 2, delivering a rob
 - **Evidence:**
   ![Price Distribution](images/price_distribution.png.png)
   ![Price Trend](images/price_trend.png)
+  ![Correlation Matrix](images/correlation_matrix.png)
+  ![Fare Outliers](images/fare_outliers.png)
 
 ### B. Performance Monitoring (`src/monitor.py`)
 - Created a `@track_performance` decorator that logs execution time and memory usage for key pipeline steps.
