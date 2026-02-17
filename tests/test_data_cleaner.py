@@ -9,7 +9,12 @@ User Story: US-03 (Data Validation & Quality Assurance)
 
 import pytest
 import pandas as pd
-from src.data_cleaner import drop_irrelevant_columns, remove_duplicates
+from src.data_cleaner import (
+    drop_irrelevant_columns,
+    remove_duplicates,
+    handle_missing_values,
+    fix_invalid_fares
+)
 
 
 # ---------------------------------------------------------------
@@ -139,3 +144,102 @@ class TestRemoveDuplicates:
         result = remove_duplicates(df_with_duplicates)
         expected_cols = ["Airline", "Source", "Destination", "Total Fare"]
         assert list(result.columns) == expected_cols
+
+
+# ---------------------------------------------------------------
+# Tests for handle_missing_values
+# ---------------------------------------------------------------
+
+class TestHandleMissingValues:
+    """Tests for the handle_missing_values function."""
+
+    @pytest.fixture
+    def df_with_missing(self):
+        """Create a DataFrame with missing values."""
+        data = {
+            "Numerical": [10.0, None, 30.0, 40.0, None],  # Median=30
+            "Categorical": ["A", "B", None, "A", None],   # Mode=A
+            "Other": [None, None, "C", "C", "C"]          # Mode=C
+        }
+        return pd.DataFrame(data)
+
+    def test_imputes_numerical_with_median(self, df_with_missing):
+        """Test that numerical columns are imputed with median."""
+        result = handle_missing_values(df_with_missing)
+        # Median of [10, 30, 40] is 30
+        assert result["Numerical"].isnull().sum() == 0
+        assert result["Numerical"].iloc[1] == 30.0
+        assert result["Numerical"].iloc[4] == 30.0
+
+    def test_imputes_categorical_with_mode(self, df_with_missing):
+        """Test that categorical columns are imputed with mode."""
+        result = handle_missing_values(df_with_missing)
+        # Mode of ["A", "B", "A"] is "A"
+        assert result["Categorical"].isnull().sum() == 0
+        assert result["Categorical"].iloc[2] == "A"
+        assert result["Categorical"].iloc[4] == "A"
+
+    def test_handles_all_missing_column(self):
+        """Test behavior when a column is entirely missing."""
+        df = pd.DataFrame({"Empty": [None, None, None]})
+        result = handle_missing_values(df)
+        # Should fill with "Unknown" as mode is empty
+        assert result["Empty"].isnull().sum() == 0
+        assert result["Empty"].iloc[0] == "Unknown"
+
+    def test_no_change_when_no_missing(self):
+        """Test that complete DataFrames are unchanged."""
+        df = pd.DataFrame({"A": [1, 2], "B": ["x", "y"]})
+        result = handle_missing_values(df)
+        assert result.isnull().sum().sum() == 0
+        assert result.equals(df)
+
+
+# ---------------------------------------------------------------
+# Tests for fix_invalid_fares
+# ---------------------------------------------------------------
+
+class TestFixInvalidFares:
+    """Tests for the fix_invalid_fares function."""
+
+    @pytest.fixture
+    def df_with_invalid_fares(self):
+        """Create a DataFrame with negative and zero fares."""
+        data = {
+            "Base Fare": [3500.0, -500.0, 4000.0, 0.0],  # Median of valid (3500, 4000) = 3750
+            "Tax & Surcharge": [500.0, 100.0, -50.0, 0.0],
+            "Total Fare": [4000.0, -400.0, 0.0, 4500.0],
+            "Other": [-100, 200, 300, 400]  # Should be ignored
+        }
+        return pd.DataFrame(data)
+
+    def test_fixes_negative_fares(self, df_with_invalid_fares):
+        """Test that negative fares are replaced."""
+        result = fix_invalid_fares(df_with_invalid_fares)
+        assert (result["Base Fare"] > 0).all()
+        assert (result["Tax & Surcharge"] > 0).all()
+        assert (result["Total Fare"] > 0).all()
+
+    def test_fixes_zero_fares(self, df_with_invalid_fares):
+        """Test that zero fares are replaced."""
+        result = fix_invalid_fares(df_with_invalid_fares)
+        assert (result["Base Fare"] != 0).all()
+
+    def test_uses_median_for_replacement(self, df_with_invalid_fares):
+        """Test that the replacement value is the median of valid entries."""
+        # Valid Base Fares: 3500, 4000 -> Median 3750
+        result = fix_invalid_fares(df_with_invalid_fares)
+        # Index 1 was -500, Index 3 was 0
+        assert result["Base Fare"].iloc[1] == 3750.0
+        assert result["Base Fare"].iloc[3] == 3750.0
+
+    def test_ignores_non_fare_columns(self, df_with_invalid_fares):
+        """Test that non-identified fare columns are untouched."""
+        result = fix_invalid_fares(df_with_invalid_fares)
+        assert result["Other"].iloc[0] == -100  # Should remain negative
+
+    def test_no_change_valid_fares(self):
+        """Test that valid fares are unchanged."""
+        df = pd.DataFrame({"Total Fare": [100.0, 200.0]})
+        result = fix_invalid_fares(df)
+        assert result.equals(df)
