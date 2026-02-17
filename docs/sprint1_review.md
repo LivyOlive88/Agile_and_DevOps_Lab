@@ -21,7 +21,7 @@ I successfully completed all planned User Stories for Sprint 1, delivering a fun
 - Implemented `load_dataset` to safely read CSV files.
 - Implemented `inspect_dataset` to generate a summary report (shape, missing values, duplicates).
 - **Evidence:**
-  > *data_load.png*
+  ![Data Loading Output](images/data_load.png)
 
 ### B. Data Cleaning Pipeline (`src/data_cleaner.py`)
 - Implemented a robust cleaning pipeline that:
@@ -36,14 +36,14 @@ I successfully completed all planned User Stories for Sprint 1, delivering a fun
 - Created 40 unit tests covering all functions.
 - Implemented `TestLoadDataset`, `TestInspectDataset`, `TestCleanDataset` (Integration).
 - **Evidence:**
-  > *sprint1_unit_tests.png*
+  ![Unit Tests Output](images/sprint1_unit_tests.png)
 
 ### D. CI/CD Pipeline (`.github/workflows/ci.yml`)
 - Configured GitHub Actions to automatically run:
     - Linting (`flake8`)
     - Unit Tests (`pytest`)
 - **Evidence:**
-  > *ci_cd_pipeline.png*
+  ![CI Pipeline Status](images/ci_cd_pipeline.png)
 
 ## 3. Demo Script
 
