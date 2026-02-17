@@ -120,18 +120,24 @@ def plot_price_over_time(df: pd.DataFrame, output_dir: str = "outputs/plots"):
 
     date_col = date_cols[0]
     
-    # Calculate daily average fare
-    daily_avg = df.groupby(date_col)["Total Fare"].mean().reset_index()
+    # Calculate daily average fare and ensure sorted by date
+    # Convert dates to just date parts for cleaner grouping
+    df_temp = df.copy()
+    df_temp[date_col] = pd.to_datetime(df_temp[date_col]).dt.date
+    daily_avg = df_temp.groupby(date_col)["Total Fare"].mean().reset_index()
+    daily_avg = daily_avg.sort_values(by=date_col)
     
     os.makedirs(output_dir, exist_ok=True)
     plt.figure(figsize=(12, 6))
     
-    sns.lineplot(data=daily_avg, x=date_col, y="Total Fare", marker="o")
-    plt.title("Average Daily Flight Fare Trend")
-    plt.xlabel("Date")
-    plt.ylabel("Average Total Fare (BDT)")
+    plt.plot(daily_avg[date_col], daily_avg["Total Fare"], 
+             marker='o', markersize=4, linestyle='-', color='royalblue', linewidth=2)
+    
+    plt.title("Average Daily Flight Fare Trend", fontsize=14, fontweight='bold')
+    plt.xlabel("Date", fontsize=12)
+    plt.ylabel("Average Total Fare (BDT)", fontsize=12)
     plt.xticks(rotation=45)
-    plt.grid(True, linestyle="--", alpha=0.7)
+    plt.grid(True, linestyle="--", alpha=0.6)
     
     plt.tight_layout()
     output_path = os.path.join(output_dir, "price_trend.png")
