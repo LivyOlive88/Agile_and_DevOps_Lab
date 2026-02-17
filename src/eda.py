@@ -12,10 +12,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from src.logger import setup_logger
+from src.monitor import track_performance
 
 logger = setup_logger(__name__)
 
 
+@track_performance
 def compute_statistics(df: pd.DataFrame) -> pd.DataFrame:
     """
     Compute descriptive statistics for numerical columns.

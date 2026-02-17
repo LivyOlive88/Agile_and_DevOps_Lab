@@ -10,6 +10,7 @@ User Story: US-02 (Data Cleaning & Preprocessing)
 
 import pandas as pd
 from src.logger import setup_logger
+from src.monitor import track_performance
 
 logger = setup_logger(__name__)
 
@@ -213,6 +214,7 @@ def convert_data_types(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+@track_performance
 def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     """
     Run the full data cleaning pipeline.
