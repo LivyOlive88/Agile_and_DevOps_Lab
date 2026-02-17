@@ -1,68 +1,68 @@
-# Flight Fare Prediction - Data Analysis Pipeline
+# Flight Fare Analysis Pipeline (Agile & DevOps Lab)
 
-## Product Vision
-To build a data analysis pipeline that explores and preprocesses Bangladesh flight fare data, uncovering pricing patterns, seasonal trends, and route-based insights through thorough data cleaning and exploratory data analysis.
+A robust data engineering pipeline for analyzing flight prices, built with Agile methodologies and DevOps best practices. This project automates data loading, cleaning, exploratory data analysis (EDA), and reporting.
 
-## Project Overview
-This project applies the full data science workflow for analyzing flight fares — from data loading and cleaning to exploratory data analysis (EDA) — while following **Agile principles** and **DevOps practices** throughout the development process.
+## 🚀 Features
 
-## Problem Statement
-Airlines and travel platforms need to understand ticket pricing patterns based on route, airline, and travel date. This project analyzes historical flight price data from Bangladesh to uncover fare trends, seasonal variations, and route-based pricing insights.
+- **Automated Data Cleaning:** Handles missing values, duplicates, and inconsistent city names (e.g., "Dacca" -> "Dhaka").
+- **Exploratory Data Analysis (EDA):** Generates statistical summaries and visualizations (Price Distribution, Price Trends).
+- **Performance Monitoring:** Tracks execution time and memory usage for each pipeline step.
+- **CI/CD Integration:** Automatically linted and tested via GitHub Actions.
+- **Logging:** Centralized logging to both console and `logs/pipeline.log`.
 
-## Dataset
-- **Source:** [Flight Price Dataset of Bangladesh](https://www.kaggle.com/) (Kaggle)
-- **File:** `flight_data.csv`
-- **Key Variables:** Airline, Source, Destination, Date, Base Fare, Tax & Surcharge, Total Fare
+## 📂 Project Structure
 
-## Project Structure
 ```
 Agile_and_DevOps/
-|-- data/                          # Raw dataset
-|   |-- flight_data.csv
-|-- docs/                          # Agile & sprint documentation
-|-- src/                           # Source code modules
-|-- tests/                         # Unit and integration tests
-|-- outputs/                       # Generated plots & reports
-|   |-- plots/
-|   |-- reports/
-|-- .github/                       # CI/CD pipeline
-|   |-- workflows/
-|-- .gitignore
-|-- requirements.txt
-|-- README.md
+├── .github/workflows/    # CI/CD Pipeline Configuration
+├── data/                 # Raw Dataset (flight_data.csv)
+├── docs/                 # Documentation (Sprints, Reviews, Images)
+├── logs/                 # Execution Logs
+├── outputs/              # Generated Reports (Plots, CSVs)
+├── src/                  # Source Code
+│   ├── data_loader.py    # Data Ingestion
+│   ├── data_cleaner.py   # Transformation Logic
+│   ├── eda.py            # Analytics & Visualization
+│   ├── monitor.py        # Performance Monitoring
+│   ├── logger.py         # Logging Configuration
+├── tests/                # Unit & Integration Tests
+├── main.py               # Main Entry Point
+├── run_pipeline.bat      # Windows Execution Script
+├── requirements.txt      # Project Dependencies
+└── README.md             # Project Documentation
 ```
 
-## Getting Started
+## 🛠️ Usage
 
-### Prerequisites
-- Python 3.9+
-- pip (Python package manager)
-
-### Installation
-```bash
-# Clone the repository
-git clone https://github.com/LivyOlive88/Agile_and_DevOps_Lab.git
-cd Agile_and_DevOps_Lab
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
+### Quick Start (Windows)
+Double-click `run_pipeline.bat` or run:
+```powershell
+.\run_pipeline.bat
 ```
 
-## Agile Methodology
-This project follows an Agile approach with 3 sprints:
+### Manual Execution
+1. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+2. Run the main script:
+   ```bash
+   python main.py
+   ```
+3. Run tests:
+   ```bash
+   pytest tests/ -v
+   ```
 
-| Sprint | Focus | Status |
-|--------|-------|--------|
-| Sprint 0 | Planning & Setup | In Progress |
-| Sprint 1 | Data Loading, Cleaning & Validation | Not Started |
-| Sprint 2 | EDA, Monitoring & Reporting | Not Started |
+## 📊 Outputs
 
+After running the pipeline, check the `outputs/` directory:
+- **`outputs/reports/descriptive_statistics.csv`**: Summary stats for numerical columns.
+- **`outputs/plots/price_distribution.png`**: Histogram of flight prices.
+- **`outputs/plots/price_trend.png`**: Line chart showing price trends over time.
+
+## 🔄 DevOps Practices
+
+- **Agile Sprints:** Development was broken into Sprint 0 (Planning), Sprint 1 (Core Pipeline), and Sprint 2 (EDA & Monitoring).
+- **CI/CD:** GitHub Actions workflow runs `flake8` and `pytest` on every push.
+- **TDD:** Unit tests were written to validate cleaning logic and ensure reliability.
