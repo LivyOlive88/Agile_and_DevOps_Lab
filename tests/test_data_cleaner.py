@@ -13,7 +13,10 @@ from src.data_cleaner import (
     drop_irrelevant_columns,
     remove_duplicates,
     handle_missing_values,
-    fix_invalid_fares
+    fix_invalid_fares,
+    normalize_city_names,
+    convert_data_types,
+    clean_dataset
 )
 
 
@@ -243,3 +246,144 @@ class TestFixInvalidFares:
         df = pd.DataFrame({"Total Fare": [100.0, 200.0]})
         result = fix_invalid_fares(df)
         assert result.equals(df)
+
+
+# ---------------------------------------------------------------
+# Tests for normalize_city_names
+# ---------------------------------------------------------------
+
+class TestNormalizeCityNames:
+    """Tests for the normalize_city_names function."""
+
+    def test_normalizes_dhaka_variants(self):
+        """Test that Dacca/dacca/DACCA are converted to Dhaka."""
+        df = pd.DataFrame({"Source": ["Dacca", "dacca", "DACCA", "Dhaka"]})
+        result = normalize_city_names(df)
+        assert (result["Source"] == "Dhaka").all()
+
+    def test_normalizes_chittagong_variants(self):
+        """Test that Chittagong variants are converted to Chattogram."""
+        df = pd.DataFrame({"Destination": ["Chittagong", "chittagong", "CHITTAGONG"]})
+        result = normalize_city_names(df)
+        assert (result["Destination"] == "Chattogram").all()
+
+    def test_strips_whitespace(self):
+        """Test that leading/trailing whitespace is removed."""
+        df = pd.DataFrame({"Source": [" Dhaka ", "Sylhet "]})
+        result = normalize_city_names(df)
+        assert result["Source"].iloc[0] == "Dhaka"
+        assert result["Source"].iloc[1] == "Sylhet"
+
+    def test_title_cases_other_cities(self):
+        """Test that other city names are title-cased."""
+        df = pd.DataFrame({"Source": ["cox's bazar", "sylhet"]})
+        result = normalize_city_names(df)
+        assert result["Source"].iloc[0] == "Cox'S Bazar"
+        assert result["Source"].iloc[1] == "Sylhet"
+
+    def test_handles_missing_columns(self):
+        """Test that function handles missing Source/Destination columns."""
+        df = pd.DataFrame({"Other": ["A", "B"]})
+        result = normalize_city_names(df)
+        assert result.equals(df)
+
+
+# ---------------------------------------------------------------
+# Tests for convert_data_types
+# ---------------------------------------------------------------
+
+class TestConvertDataTypes:
+    """Tests for the convert_data_types function."""
+
+    def test_converts_fares_to_float(self):
+        """Test that fare columns are converted to float."""
+        df = pd.DataFrame({
+            "Base Fare": ["100", 200, "300.5"],
+            "Total Fare": [150, "250", 350.5]
+        })
+        result = convert_data_types(df)
+        assert pd.api.types.is_float_dtype(result["Base Fare"])
+        assert pd.api.types.is_float_dtype(result["Total Fare"])
+        assert result["Base Fare"].iloc[0] == 100.0
+
+    def test_converts_dates_to_datetime(self):
+        """Test that date columns are converted to datetime."""
+        df = pd.DataFrame({"Date of Journey": ["2024-01-01", "15/01/2024"]})
+        result = convert_data_types(df)
+        assert pd.api.types.is_datetime64_any_dtype(result["Date of Journey"])
+
+    def test_handles_invalid_numeric_conversion(self):
+        """Test that invalid numeric strings become NaN."""
+        df = pd.DataFrame({"Base Fare": ["100", "invalid", "200"]})
+        result = convert_data_types(df)
+        assert pd.isna(result["Base Fare"].iloc[1])
+
+    def test_handles_invalid_date_conversion(self):
+        """Test that invalid date strings become NaT."""
+        df = pd.DataFrame({"Date": ["2024-01-01", "not-a-date"]})
+        result = convert_data_types(df)
+        assert pd.isna(result["Date"].iloc[1])
+
+
+# ---------------------------------------------------------------
+# Tests for clean_dataset (Integration Test)
+# ---------------------------------------------------------------
+
+class TestCleanDataset:
+    """Tests for the main clean_dataset pipeline."""
+
+    @pytest.fixture
+    def dirty_df(self):
+        """Create a dirty DataFrame with multiple issues."""
+        data = {
+            "Unnamed: 0": [0, 1, 2, 3],
+            "Date": ["2024-01-01", "2024-01-02", "2024-01-01", "invalid"],
+            "Source": ["Dacca", "Dhaka", "Dacca", "Sylhet"],
+            "Base Fare": ["3000", -500, "3000", 4000],  # "3000"->3000, -500->Median
+            "Total Fare": [3500, 3500, 3500, 4500]      # Duplicate row 0 & 2
+        }
+        return pd.DataFrame(data)
+
+    def test_pipeline_execution(self, dirty_df):
+        """Test that the pipeline executes all steps correctly."""
+        result = clean_dataset(dirty_df)
+
+        # 1. Check irrelevant columns dropped
+        assert "Unnamed: 0" not in result.columns
+
+        # 2. Check duplicates removed (Row 2 was duplicate of Row 0 but with different index)
+        # However, due to "Unnamed" being unique, duplicates might not be caught if checked before drop.
+        # clean_dataset drops irrelevant cols first, so duplicates should be caught.
+        # Row 0: 2024-01-01, Dacca, 3000, 3500
+        # Row 2: 2024-01-01, Dacca, 3000, 3500
+        # These are identical after dropping "Unnamed: 0". One should be removed.
+        # Original: 4 rows. Expected: 3 rows.
+        assert len(result) == 3
+
+        # 3. Check city normalization
+        assert (result["Source"] == "Dhaka").sum() == 2 # Row 0 and Row 1 (Dacca->Dhaka)
+        # Note: Dacca->Dhaka.
+        # Row 0: Dacca -> Dhaka
+        # Row 1: Dhaka -> Dhaka
+        # Row 3: Sylhet -> Sylhet
+
+        # 4. Check negative fare fixed
+        # Row 1 had -500. Valid values: 3000, 4000. Median = 3500.
+        assert (result["Base Fare"] > 0).all()
+
+        # 5. Check data types
+        assert pd.api.types.is_datetime64_any_dtype(result["Date"])
+        assert pd.api.types.is_numeric_dtype(result["Base Fare"])
+
+        # 6. Check NaT/NaN handling (imputation)
+        # "invalid" date becomes NaT. handle_missing_values doesn't impute datetime by default strategy?
+        # Let's check handle_missing_values implementation.
+        # It handles "float64", "int64". Datetime is not explicit.
+        # However, convert_data_types runs BEFORE handle_missing_values.
+        # So "invalid" -> NaT. NaT is not float/int.
+        # The mode strategy (else block) might pick it up?
+        # NaT is like None.
+        # Let's verify if "Date" remains NaT or gets filled.
+        # Ideally we want it filled or dropped.
+        # For this basic pipeline, if it's not numeric, it falls to 'else' -> mode or "Unknown".
+        assert result["Date"].isnull().sum() == 0
