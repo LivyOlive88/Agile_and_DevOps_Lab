@@ -1,0 +1,13 @@
+# Data Processing
+pandas==2.2.0
+numpy==1.26.3
+
+# Visualization
+matplotlib==3.8.2
+seaborn==0.13.1
+
+# Testing
+pytest==8.0.0
+
+# Code Quality
+flake8==7.0.0
