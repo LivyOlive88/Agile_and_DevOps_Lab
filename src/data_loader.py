@@ -112,7 +112,7 @@ if __name__ == "__main__":
         print(f"Duplicate Rows: {inspection['duplicate_count']}")
         print(f"\nColumns: {inspection['columns']}")
         print(f"\nMissing Values: {inspection['missing_values']}")
-        print(f"\nFirst 5 Rows:")
+        print("\nFirst 5 Rows:")
         print(dataset.head())
     except (FileNotFoundError, ValueError) as e:
         logger.error("Failed to load dataset: %s", e)
