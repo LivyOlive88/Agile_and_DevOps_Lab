@@ -66,3 +66,72 @@ def save_statistics(stats: pd.DataFrame, output_dir: str = "outputs/reports"):
     except Exception as e:
         logger.error("Failed to save statistics: %s", e)
         raise
+        
+        
+def plot_price_distribution(df: pd.DataFrame, output_dir: str = "outputs/plots"):
+    """
+    Plot the distribution of Total Fare.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The cleaned dataset.
+    output_dir : str
+        Directory to save the plot.
+    """
+    if "Total Fare" not in df.columns:
+        logger.warning("Total Fare column not found for plotting.")
+        return
+
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(10, 6))
+    
+    sns.histplot(df["Total Fare"], kde=True, bins=30)
+    plt.title("Distribution of Total Flight Fares")
+    plt.xlabel("Total Fare (BDT)")
+    plt.ylabel("Frequency")
+    
+    output_path = os.path.join(output_dir, "price_distribution.png")
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    
+    logger.info("Price distribution plot saved to: %s", output_path)
+
+
+def plot_price_over_time(df: pd.DataFrame, output_dir: str = "outputs/plots"):
+    """
+    Plot the average Total Fare over time.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The cleaned dataset.
+    output_dir : str
+        Directory to save the plot.
+    """
+    date_cols = [c for c in df.columns if "date" in c.lower()]
+    if not date_cols or "Total Fare" not in df.columns:
+        logger.warning("Date or Fare column missing for time series plot.")
+        return
+
+    date_col = date_cols[0]
+    
+    # Calculate daily average fare
+    daily_avg = df.groupby(date_col)["Total Fare"].mean().reset_index()
+    
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(12, 6))
+    
+    sns.lineplot(data=daily_avg, x=date_col, y="Total Fare", marker="o")
+    plt.title("Average Daily Flight Fare Trend")
+    plt.xlabel("Date")
+    plt.ylabel("Average Total Fare (BDT)")
+    plt.xticks(rotation=45)
+    plt.grid(True, linestyle="--", alpha=0.7)
+    
+    plt.tight_layout()
+    output_path = os.path.join(output_dir, "price_trend.png")
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    
+    logger.info("Price trend plot saved to: %s", output_path)
