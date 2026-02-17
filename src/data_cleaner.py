@@ -15,6 +15,25 @@ from src.monitor import track_performance
 logger = setup_logger(__name__)
 
 
+def standardize_column_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Rename columns to standard names (removing units like BDT).
+    """
+    rename_map = {
+        "Base Fare (BDT)": "Base Fare",
+        "Tax & Surcharge (BDT)": "Tax & Surcharge",
+        "Total Fare (BDT)": "Total Fare"
+    }
+    # Only rename if they exist
+    existing_renames = {k: v for k, v in rename_map.items() if k in df.columns}
+    
+    if existing_renames:
+        df = df.rename(columns=existing_renames)
+        logger.info("Renamed columns: %s", existing_renames)
+    
+    return df
+
+
 def drop_irrelevant_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Drop irrelevant or unnamed columns from the dataset.
@@ -236,6 +255,9 @@ def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
         "Starting data cleaning pipeline. Initial shape: %s", initial_shape
     )
 
+    # Step 0: Standardize column names (Handle (BDT) suffix)
+    df = standardize_column_names(df)
+
     # Step 1: Drop irrelevant columns
     df = drop_irrelevant_columns(df)
 
@@ -263,4 +285,3 @@ def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return df
-
