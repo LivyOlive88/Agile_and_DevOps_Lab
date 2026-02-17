@@ -57,13 +57,61 @@ def load_dataset(filepath: str) -> pd.DataFrame:
     return df
 
 
+def inspect_dataset(df: pd.DataFrame) -> dict:
+    """
+    Perform initial inspection of the dataset and return a summary.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The loaded dataset.
+
+    Returns
+    -------
+    dict
+        A dictionary containing inspection results:
+        - shape: tuple of (rows, columns)
+        - columns: list of column names
+        - dtypes: dict of column data types
+        - missing_values: dict of missing value counts per column
+        - duplicate_count: int count of duplicate rows
+        - memory_usage: float memory usage in MB
+    """
+    logger.info("Inspecting dataset...")
+
+    inspection = {
+        "shape": df.shape,
+        "columns": df.columns.tolist(),
+        "dtypes": df.dtypes.astype(str).to_dict(),
+        "missing_values": df.isnull().sum().to_dict(),
+        "duplicate_count": int(df.duplicated().sum()),
+        "memory_usage": round(
+            df.memory_usage(deep=True).sum() / (1024 * 1024), 2
+        ),
+    }
+
+    logger.info("Shape: %s", inspection["shape"])
+    logger.info(
+        "Missing values: %d total",
+        sum(inspection["missing_values"].values())
+    )
+    logger.info("Duplicate rows: %d", inspection["duplicate_count"])
+    logger.info("Memory usage: %.2f MB", inspection["memory_usage"])
+
+    return inspection
+
+
 if __name__ == "__main__":
     DATA_PATH = os.path.join("data", "flight_data.csv")
 
     try:
         dataset = load_dataset(DATA_PATH)
-        print(f"\nDataset Shape: {dataset.shape[0]} rows x {dataset.shape[1]} columns")
-        print(f"\nColumns: {dataset.columns.tolist()}")
+        inspection = inspect_dataset(dataset)
+        print(f"\nDataset Shape: {inspection['shape'][0]} rows x {inspection['shape'][1]} columns")
+        print(f"Memory Usage: {inspection['memory_usage']} MB")
+        print(f"Duplicate Rows: {inspection['duplicate_count']}")
+        print(f"\nColumns: {inspection['columns']}")
+        print(f"\nMissing Values: {inspection['missing_values']}")
         print(f"\nFirst 5 Rows:")
         print(dataset.head())
     except (FileNotFoundError, ValueError) as e:
