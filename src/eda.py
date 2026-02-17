@@ -9,6 +9,8 @@ User Story: US-04 (Exploratory Data Analysis)
 
 import os
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 from src.logger import setup_logger
@@ -137,3 +139,62 @@ def plot_price_over_time(df: pd.DataFrame, output_dir: str = "outputs/plots"):
     plt.close()
     
     logger.info("Price trend plot saved to: %s", output_path)
+
+
+def plot_correlation_matrix(df: pd.DataFrame, output_dir: str = "outputs/plots"):
+    """
+    Plot heatmap of correlation matrix for numerical features.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The cleaned dataset.
+    output_dir : str
+        Directory to save the plot.
+    """
+    numeric_df = df.select_dtypes(include=['float64', 'int64'])
+    if numeric_df.empty or numeric_df.shape[1] < 2:
+        logger.warning("Not enough numerical columns for correlation matrix.")
+        return
+
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(10, 8))
+    
+    corr = numeric_df.corr()
+    sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", linewidths=0.5)
+    plt.title("Correlation Matrix of Numerical Features")
+    
+    output_path = os.path.join(output_dir, "correlation_matrix.png")
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    
+    logger.info("Correlation matrix saved to: %s", output_path)
+
+
+def plot_outliers(df: pd.DataFrame, output_dir: str = "outputs/plots"):
+    """
+    Plot boxplots for Total Fare to visualize outliers.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The cleaned dataset.
+    output_dir : str
+        Directory to save the plot.
+    """
+    if "Total Fare" not in df.columns:
+        logger.warning("Total Fare column missing for outlier plot.")
+        return
+
+    os.makedirs(output_dir, exist_ok=True)
+    plt.figure(figsize=(8, 6))
+    
+    sns.boxplot(y=df["Total Fare"])
+    plt.title("Boxplot of Total Fare (Outlier Detection)")
+    plt.ylabel("Total Fare (BDT)")
+    
+    output_path = os.path.join(output_dir, "fare_outliers.png")
+    plt.savefig(output_path, dpi=300)
+    plt.close()
+    
+    logger.info("Outlier plot saved to: %s", output_path)

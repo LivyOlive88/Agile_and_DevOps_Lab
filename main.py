@@ -18,7 +18,9 @@ from src.eda import (
     compute_statistics,
     save_statistics,
     plot_price_distribution,
-    plot_price_over_time
+    plot_price_over_time,
+    plot_correlation_matrix,
+    plot_outliers
 )
 from src.logger import setup_logger
 
@@ -45,15 +47,18 @@ def main():
         inspect_dataset(df)
 
         # Step 2: Clean Data
-        df_clean = clean_dataset(df)
+        df = clean_dataset(df)
 
         # Step 3: EDA & Visualization
-        stats = compute_statistics(df_clean)
+        stats = compute_statistics(df)
         if not stats.empty:
             save_statistics(stats, os.path.join(output_dir, "reports"))
         
-        plot_price_distribution(df_clean, os.path.join(output_dir, "plots"))
-        plot_price_over_time(df_clean, os.path.join(output_dir, "plots"))
+        plot_output_dir = os.path.join(output_dir, "plots")
+        plot_price_distribution(df, plot_output_dir)
+        plot_price_over_time(df, plot_output_dir)
+        plot_correlation_matrix(df, plot_output_dir)
+        plot_outliers(df, plot_output_dir)
 
         logger.info("Pipeline completed successfully! Check 'outputs/' for results.")
 
