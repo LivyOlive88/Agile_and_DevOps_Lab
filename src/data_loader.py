@@ -55,3 +55,16 @@ def load_dataset(filepath: str) -> pd.DataFrame:
         df.shape[0], df.shape[1]
     )
     return df
+
+
+if __name__ == "__main__":
+    DATA_PATH = os.path.join("data", "flight_data.csv")
+
+    try:
+        dataset = load_dataset(DATA_PATH)
+        print(f"\nDataset Shape: {dataset.shape[0]} rows x {dataset.shape[1]} columns")
+        print(f"\nColumns: {dataset.columns.tolist()}")
+        print(f"\nFirst 5 Rows:")
+        print(dataset.head())
+    except (FileNotFoundError, ValueError) as e:
+        logger.error("Failed to load dataset: %s", e)

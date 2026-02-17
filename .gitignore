@@ -29,5 +29,8 @@ Thumbs.db
 # Outputs (generated plots and reports)
 outputs/
 
+# Log files
+logs/
+
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
