@@ -33,7 +33,7 @@ def track_performance(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         process = psutil.Process(os.getpid())
-        
+
         # Record start state
         start_time = time.time()
         start_memory = process.memory_info().rss / (1024 * 1024)  # MB
@@ -42,11 +42,11 @@ def track_performance(func):
 
         try:
             result = func(*args, **kwargs)
-            
+
             # Record end state
             end_time = time.time()
             end_memory = process.memory_info().rss / (1024 * 1024)  # MB
-            
+
             duration = end_time - start_time
             memory_change = end_memory - start_memory
 
@@ -55,7 +55,7 @@ def track_performance(func):
                 func.__name__, duration, end_memory, memory_change
             )
             return result
-            
+
         except Exception as e:
             logger.error("Error in '%s': %s", func.__name__, e)
             raise e
