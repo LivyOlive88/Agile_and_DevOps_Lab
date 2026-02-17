@@ -20,18 +20,20 @@ I successfully completed all planned User Stories for Sprint 2, delivering a rob
 - implemented `compute_statistics` to generate summary stats (mean, median, etc.).
 - implemented `plot_price_distribution` and `plot_price_over_time` using Matplotlib/Seaborn.
 - **Evidence:**
-  > *[Insert Screenshot of 'outputs/plots/price_distribution.png' here]*
-  > *[Insert Screenshot of 'outputs/plots/price_trend.png' here]*
+  ![Price Distribution](images/price_distribution.png.png)
+  ![Price Trend](images/price_trend.png)
 
 ### B. Performance Monitoring (`src/monitor.py`)
 - Created a `@track_performance` decorator that logs execution time and memory usage for key pipeline steps.
 - Integrated into `data_cleaner.py` and `eda.py`.
 - **Evidence:**
-  > *[Insert Screenshot of log file with performance metrics]*
+  ![Pipeline Logs - Performance Metrics](images/pipeline_logs.png)
 
 ### C. Final Report Generator (`main.py`)
 - Created an orchestration script that runs the entire pipeline end-to-end.
 - Added `run_pipeline.bat` for easy execution on Windows.
+- **Evidence (Data Loading):**
+  ![Data Load Output](images/data_load.png)
 
 ## 3. Demo Script
 
@@ -48,7 +50,9 @@ To verify the Sprint 2 increment:
 - [x] Code fulfills the requirements of the User Story.
 - [x] Code follows PEP 8 standards and passes `flake8`.
 - [x] Unit tests are written and passing (47 tests passed).
+  ![Unit Tests Passing](images/sprint1_unit_tests.png)
 - [x] CI pipeline is passing on the main branch.
+  ![CI/CD Pipeline Passing](images/ci_cd_pipeline.png)
 - [x] Documentation (README, Review) is updated.
 
 ## 5. Project Conclusion
