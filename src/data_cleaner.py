@@ -66,3 +66,81 @@ def remove_duplicates(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     return df
+
+
+def handle_missing_values(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Handle missing values in the dataset.
+
+    Strategy:
+    - Numerical columns: Impute with median
+    - Categorical columns: Impute with mode or 'Unknown'
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset with missing values handled.
+    """
+    missing_before = df.isnull().sum().sum()
+    logger.info("Total missing values before imputation: %d", missing_before)
+
+    for col in df.columns:
+        if df[col].isnull().sum() == 0:
+            continue
+
+        if df[col].dtype in ["float64", "int64", "float32", "int32"]:
+            median_val = df[col].median()
+            df[col] = df[col].fillna(median_val)
+            logger.info("Imputed '%s' with median: %s", col, median_val)
+        else:
+            if not df[col].mode().empty:
+                mode_val = df[col].mode()[0]
+                df[col] = df[col].fillna(mode_val)
+                logger.info("Imputed '%s' with mode: %s", col, mode_val)
+            else:
+                df[col] = df[col].fillna("Unknown")
+                logger.info("Imputed '%s' with 'Unknown'", col)
+
+    missing_after = df.isnull().sum().sum()
+    logger.info("Total missing values after imputation: %d", missing_after)
+
+    return df
+
+
+def fix_invalid_fares(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Fix invalid fare values (negative or zero).
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset with invalid fares handled.
+    """
+    fare_columns = ["Base Fare", "Tax & Surcharge", "Total Fare"]
+
+    for col in fare_columns:
+        if col in df.columns:
+            invalid_count = (df[col] <= 0).sum()
+            if invalid_count > 0:
+                logger.warning(
+                    "Found %d invalid (<=0) values in '%s'",
+                    invalid_count, col
+                )
+                median_val = df.loc[df[col] > 0, col].median()
+                df.loc[df[col] <= 0, col] = median_val
+                logger.info(
+                    "Replaced invalid '%s' values with median: %s",
+                    col, median_val
+                )
+
+    return df
