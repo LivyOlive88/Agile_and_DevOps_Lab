@@ -144,3 +144,121 @@ def fix_invalid_fares(df: pd.DataFrame) -> pd.DataFrame:
                 )
 
     return df
+
+
+def normalize_city_names(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Normalize inconsistent city names in Source and Destination columns.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset with normalized city names.
+    """
+    city_mapping = {
+        "Dacca": "Dhaka",
+        "dacca": "Dhaka",
+        "DACCA": "Dhaka",
+        "Chittagong": "Chattogram",
+        "chittagong": "Chattogram",
+        "CHITTAGONG": "Chattogram",
+    }
+
+    for col in ["Source", "Destination"]:
+        if col in df.columns:
+            # Strip whitespace
+            df[col] = df[col].astype(str).str.strip()
+            # Apply mapping
+            df[col] = df[col].replace(city_mapping)
+            # Title case for consistency
+            df[col] = df[col].str.title()
+            logger.info("Normalized city names in '%s'", col)
+
+    return df
+
+
+def convert_data_types(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Convert columns to appropriate data types.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset with corrected data types.
+    """
+    # Convert fare columns to float
+    fare_columns = ["Base Fare", "Tax & Surcharge", "Total Fare"]
+    for col in fare_columns:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+            logger.info("Converted '%s' to numeric (float)", col)
+
+    # Convert date columns to datetime
+    date_columns = [col for col in df.columns if "date" in col.lower()]
+    for col in date_columns:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce")
+            logger.info("Converted '%s' to datetime", col)
+
+    return df
+
+
+def clean_dataset(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Run the full data cleaning pipeline.
+
+    This function orchestrates all cleaning steps in the correct order.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The raw dataset.
+
+    Returns
+    -------
+    pd.DataFrame
+        Fully cleaned dataset.
+    """
+    initial_shape = df.shape
+    logger.info(
+        "Starting data cleaning pipeline. Initial shape: %s", initial_shape
+    )
+
+    # Step 1: Drop irrelevant columns
+    df = drop_irrelevant_columns(df)
+
+    # Step 2: Remove duplicates
+    df = remove_duplicates(df)
+
+    # Step 3: Convert data types (before handling missing/invalid values)
+    df = convert_data_types(df)
+
+    # Step 4: Handle missing values
+    df = handle_missing_values(df)
+
+    # Step 5: Fix invalid fare values
+    df = fix_invalid_fares(df)
+
+    # Step 6: Normalize city names
+    df = normalize_city_names(df)
+
+    final_shape = df.shape
+    logger.info("Data cleaning complete. Final shape: %s", final_shape)
+    logger.info(
+        "Rows removed: %d, Columns removed: %d",
+        initial_shape[0] - final_shape[0],
+        initial_shape[1] - final_shape[1]
+    )
+
+    return df
+
