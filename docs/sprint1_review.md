@@ -43,7 +43,8 @@ I successfully completed all planned User Stories for Sprint 1, delivering a fun
     - Linting (`flake8`)
     - Unit Tests (`pytest`)
 - **Evidence:**
-  ![CI Pipeline Status](images/ci_cd_pipeline.png)
+    ![Overall CI/CD Workflow](images/overall_ci_cd_workflow.png)
+    ![CI Pipeline Status](images/ci_cd_pipeline.png)
 
 ## 3. Demo Script
 

@@ -54,6 +54,7 @@ To verify the Sprint 2 increment:
 - [x] Unit tests are written and passing (47 tests passed).
   ![Unit Tests Passing](images/sprint1_unit_tests.png)
 - [x] CI pipeline is passing on the main branch.
+  ![Overall CI/CD Workflow](images/overall_ci_cd_workflow.png)
   ![CI/CD Pipeline Passing](images/ci_cd_pipeline.png)
 - [x] Documentation (README, Review) is updated.
 
