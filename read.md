@@ -1,7 +1,0 @@
-As a junior data scientist, you have been given a task in task.md file. I am using the file in the project.md file to implement the task. Kindly go through the project and the agile requirement and perform the task. 
-
-I previously did they entire work in Agile and DevOps Lab folder before committing the file one by one which wasn't the required agile incremental approach. So i want us to redo the work in this current folder, Agile_and_DevOps folder. I want us to commit the work step by step before proceeding to the next step. After creating just the empty folder structure, commit that, example "chore:folder and project setup" etc. I want you to prompt me to commit each single step before proceeding to the next. I don't want to have less than 20 commits so kindly take note. This is the repo i am working in https://github.com/LivyOlive88/Agile_and_DevOps_Lab.git
-
-I want you to take note of the Final Deliverables in the task.md. I want to have less Total Story Points, maximum of 12. We are only performing data cleaning and EDA from the project.md. The areas I am supposed to attach screenshots, let me run that command myself so that I can get to take the screenshots. CI/CD Evidence, I am supposed to add screenshots or logs of successful and failed pipeline runs, Testing Evidence: Screenshot of test results, Sprint Review Documents and Retrospectives. Don't foget we are working in incremental approach. The CI/CD should also be run step by step. 
-
-Type my last word in read.md to know you have read all instructions from the task.md, read.md and project.md 
